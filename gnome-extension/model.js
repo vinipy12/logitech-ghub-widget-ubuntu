@@ -127,3 +127,27 @@ export function sortRecords(records) {
         return a.name.localeCompare(b.name, undefined, {sensitivity: 'base'});
     });
 }
+
+const LOW_THRESHOLD = 20;
+const RED_LEVELS = new Set(['critical', 'action']);
+const OK_LEVELS = new Set(['normal', 'high', 'full']);
+
+export function alertStep(armed, record) {
+    const noData = record.percent === null && (record.level === null || record.level === 'unknown');
+    if (noData)
+        return {armed, fire: false};
+
+    const isLow = record.percent !== null
+        ? record.percent <= LOW_THRESHOLD
+        : RED_LEVELS.has(record.level);
+    const isOk = record.percent !== null
+        ? record.percent > LOW_THRESHOLD
+        : OK_LEVELS.has(record.level);
+    const recovering = record.charging || record.state === State.FULLY_CHARGED || isOk;
+
+    if (recovering)
+        return {armed: true, fire: false};
+    if (armed && isLow)
+        return {armed: false, fire: true};
+    return {armed, fire: false};
+}
