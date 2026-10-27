@@ -3,6 +3,7 @@ import System from 'system';
 import {runAll} from './harness.js';
 
 import './fixtures.test.js';
+import './model.filter.test.js';
 
 const failures = runAll();
 System.exit(failures === 0 ? 0 : 1);
