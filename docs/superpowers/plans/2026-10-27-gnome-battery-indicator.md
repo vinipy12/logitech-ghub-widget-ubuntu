@@ -16,7 +16,7 @@ Spec: `docs/superpowers/specs/2026-10-27-gnome-battery-indicator-design.md`. Rea
 - UUID `ghub-battery@vinipy12.github.io`; settings schema id `org.gnome.shell.extensions.ghub-battery`; schema keys `notify-low` (bool, default true) and `show-inactive` (bool, default true).
 - All D-Bus calls asynchronous on the system bus. No synchronous bus calls anywhere in the extension.
 - `model.js` and `menu.js` import nothing from `resource:///org/gnome/shell/...`; they may import `gi://UPowerGlib` only.
-- User-facing strings in Portuguese, matching the repo. Coarse level words: `Cheia, Alta, Normal, Baixa, Crítica`, unknown renders `—` (en dash U+2014... use the EN DASH `—` exactly as in the spec: `—`).
+- User-facing strings in Portuguese, matching the repo. Coarse level words: `Cheia, Alta, Normal, Baixa, Crítica`, unknown renders the dash character `—` (U+2014), exactly that character.
 - Color bands: `p > 50` normal, `20 < p <= 50` amber, `p <= 20` red; `low` amber; `critical`/`action` red; charging always normal.
 - Stylesheet colors explicit: amber `#e5a50a`, red `#e01b24`, inactive `opacity: 0.5`. No CSS variables.
 - `tests/` is never packed. `make pack` must list every runtime module via `--extra-source`.
@@ -1674,7 +1674,7 @@ If a stack trace appears, fix the named file in place, `make install` again, and
 
 - [ ] **Step 4: Manual alert check (real session)**
 
-In the real session: `Alt+F2`, `r`, Enter; `gnome-extensions enable ghub-battery@vinipy12.github.io`. Trigger a fake low reading with a one-shot gjs script that cannot change the real bus: skip. Instead verify via Looking Glass (`Alt+F2`, `lg`), tab Extensions → ghub-battery shows state ACTIVE and no error. The notification path is covered by the next step.
+In the real session: `Alt+F2`, `r`, Enter; then `gnome-extensions enable ghub-battery@vinipy12.github.io`. Open Looking Glass (`Alt+F2`, `lg`), tab Extensions: ghub-battery must show state ACTIVE with no error. A low-battery reading cannot be faked on the real bus, so the notification path is exercised directly in the next step.
 
 - [ ] **Step 5: Notification smoke test via Looking Glass**
 
