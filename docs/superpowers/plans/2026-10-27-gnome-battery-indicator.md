@@ -372,7 +372,7 @@ export function kindOf(type) {
     case Kind.KEYBOARD: return 'keyboard';
     case Kind.HEADSET:
     case Kind.HEADPHONES:
-    case Kind.AUDIO_DEVICE: return 'headset';
+    case Kind.OTHER_AUDIO: return 'headset';
     case Kind.GAMING_INPUT: return 'gaming-input';
     default: return 'other';
     }
