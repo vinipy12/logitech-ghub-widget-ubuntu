@@ -19,6 +19,7 @@ export class UPowerSource {
         // Per-path staleness tokens: a GetAll reply is applied only if no newer
         // event (removal, merge, newer fetch) touched the path since it was sent.
         this._tokens = new Map();
+        this._seq = 0;
         this._enumerating = false;
         this._available = false;
         this._subs = [];
@@ -48,7 +49,9 @@ export class UPowerSource {
     }
 
     _bump(path) {
-        const token = (this._tokens.get(path) ?? 0) + 1;
+        // Monotonic across all paths so a removed-then-re-added path can never
+        // reuse a token an older in-flight fetch still holds.
+        const token = ++this._seq;
         this._tokens.set(path, token);
         return token;
     }
