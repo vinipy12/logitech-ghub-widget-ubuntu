@@ -37,21 +37,25 @@ export default class GhubBatteryExtension extends Extension {
         this._settings = null;
     }
 
-    _onSnapshot({available, devices, removed}) {
+    _onSnapshot({available, devices}) {
         this._available = available;
-        for (const id of removed) {
-            const prev = this._known.get(id);
-            if (prev)
+        // The snapshot is authoritative: anything known that is no longer on
+        // the bus (removed, or UPower itself gone) becomes inactive but keeps
+        // its last-seen values for the dropdown.
+        for (const [id, prev] of this._known) {
+            if (!devices.has(id) && prev.active)
                 this._known.set(id, {...prev, active: false});
         }
         for (const [path, props] of devices) {
             if (!isPeripheral(props)) {
                 this._known.delete(path);
+                this._armed.delete(path);
                 continue;
             }
             const record = normalize(path, props);
             this._known.set(path, record);
-            this._maybeAlert(record);
+            if (record.active)
+                this._maybeAlert(record);
         }
         this._render();
     }
@@ -90,8 +94,8 @@ export default class GhubBatteryExtension extends Extension {
         this._destroyItems();
         wanted.forEach((r, i) => {
             const item = new PanelItem(r, this._itemOpts());
-            Main.panel.addToStatusArea(`${ROLE_PREFIX}${i}`, item, i, 'right');
             this._items.push(item);
+            Main.panel.addToStatusArea(`${ROLE_PREFIX}${i}`, item, i, 'right');
         });
     }
 
