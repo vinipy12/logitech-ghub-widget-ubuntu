@@ -115,3 +115,15 @@ const ICONS = {
 export function iconNameFor(kind) {
     return ICONS[kind] ?? ICONS.other;
 }
+
+const KIND_ORDER = ['mouse', 'keyboard', 'headset', 'gaming-input', 'other'];
+
+export function sortRecords(records) {
+    return [...records].sort((a, b) => {
+        const ka = KIND_ORDER.indexOf(a.kind);
+        const kb = KIND_ORDER.indexOf(b.kind);
+        if (ka !== kb)
+            return ka - kb;
+        return a.name.localeCompare(b.name, undefined, {sensitivity: 'base'});
+    });
+}

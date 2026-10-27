@@ -6,6 +6,7 @@ import './fixtures.test.js';
 import './model.filter.test.js';
 import './model.normalize.test.js';
 import './model.display.test.js';
+import './model.sort.test.js';
 
 const failures = runAll();
 System.exit(failures === 0 ? 0 : 1);
