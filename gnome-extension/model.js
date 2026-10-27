@@ -71,3 +71,47 @@ export function normalize(path, props) {
         source: 'upower',
     };
 }
+
+const LEVEL_WORDS = {
+    full: 'Cheia', high: 'Alta', normal: 'Normal', low: 'Baixa',
+    critical: 'Crítica', action: 'Crítica',
+};
+const NO_DATA = '—';
+
+export function labelFor(record) {
+    let value;
+    if (record.percent !== null)
+        value = `${record.percent}%`;
+    else
+        value = LEVEL_WORDS[record.level] ?? NO_DATA;
+    return record.charging ? `⚡ ${value}` : value;
+}
+
+export function colorBand(record) {
+    if (record.charging)
+        return 'normal';
+    if (record.percent !== null) {
+        if (record.percent <= 20)
+            return 'red';
+        if (record.percent <= 50)
+            return 'amber';
+        return 'normal';
+    }
+    if (record.level === 'critical' || record.level === 'action')
+        return 'red';
+    if (record.level === 'low')
+        return 'amber';
+    return 'normal';
+}
+
+const ICONS = {
+    mouse: 'input-mouse-symbolic',
+    keyboard: 'input-keyboard-symbolic',
+    headset: 'audio-headset-symbolic',
+    'gaming-input': 'input-gaming-symbolic',
+    other: 'battery-symbolic',
+};
+
+export function iconNameFor(kind) {
+    return ICONS[kind] ?? ICONS.other;
+}
