@@ -11,17 +11,23 @@ const DEVICE_IFACE = 'org.freedesktop.UPower.Device';
 const PROPS_IFACE = 'org.freedesktop.DBus.Properties';
 
 export class UPowerSource {
-    constructor(onChanged) {
+    constructor(onChanged, bus = Gio.DBus.system) {
         this._onChanged = onChanged;
-        this._bus = Gio.DBus.system;
+        this._bus = bus;
         this._devices = new Map();
         this._generation = 0;
+        // Per-path staleness tokens: a GetAll reply is applied only if no newer
+        // event (removal, merge, newer fetch) touched the path since it was sent.
+        this._tokens = new Map();
+        this._enumerating = false;
         this._available = false;
         this._subs = [];
         this._watchId = 0;
     }
 
     start() {
+        if (this._watchId)
+            return;
         this._watchId = Gio.bus_watch_name(
             Gio.BusType.SYSTEM, BUS_NAME, Gio.BusNameWatcherFlags.NONE,
             () => this._onOwnerAppeared(),
@@ -36,10 +42,20 @@ export class UPowerSource {
             this._watchId = 0;
         }
         this._devices.clear();
+        this._tokens.clear();
+        this._enumerating = false;
         this._available = false;
     }
 
+    _bump(path) {
+        const token = (this._tokens.get(path) ?? 0) + 1;
+        this._tokens.set(path, token);
+        return token;
+    }
+
     _emit(removed = []) {
+        if (this._enumerating)
+            return;
         this._onChanged({
             available: this._available,
             devices: new Map(this._devices),
@@ -68,7 +84,9 @@ export class UPowerSource {
         const gen = this._generation;
         this._unsubscribe();
         this._devices.clear();
+        this._tokens.clear();
         this._available = true;
+        this._enumerating = true;
 
         // Subscribe BEFORE enumerating so nothing is missed.
         this._subscribe('DeviceAdded', ROOT_PATH, (_p, params) => {
@@ -77,14 +95,20 @@ export class UPowerSource {
         });
         this._subscribe('DeviceRemoved', ROOT_PATH, (_p, params) => {
             const [path] = params.deepUnpack();
+            this._tokens.delete(path);
             if (this._devices.delete(path))
                 this._emit([path]);
         });
         this._subscribe('PropertiesChanged', null, (path, params) => {
-            if (!this._devices.has(path))
-                return;
             const [, changed, invalidated] = params.deepUnpack();
             const current = this._devices.get(path);
+            if (!current) {
+                // First GetAll may be in flight: supersede it with a fresh one.
+                if (this._tokens.has(path))
+                    this._fetchDevice(path, gen);
+                return;
+            }
+            this._bump(path);
             const next = {...current};
             for (const [k, v] of Object.entries(changed))
                 next[k] = v.recursiveUnpack();
@@ -95,6 +119,7 @@ export class UPowerSource {
                 this._emit();
         });
 
+        let ok = false;
         try {
             const reply = await this._bus.call(
                 BUS_NAME, ROOT_PATH, ROOT_IFACE, 'EnumerateDevices',
@@ -103,38 +128,45 @@ export class UPowerSource {
                 return;
             const [paths] = reply.deepUnpack();
             await Promise.all(paths.map(p => this._fetchDevice(p, gen, false)));
-            if (gen !== this._generation)
-                return;
-            this._emit();
+            ok = gen === this._generation;
         } catch (e) {
             if (gen === this._generation)
                 console.warn(`ghub-battery: EnumerateDevices failed: ${e.message}`);
         }
+        if (gen !== this._generation)
+            return;
+        this._enumerating = false;
+        if (ok)
+            this._emit();
     }
 
     _onOwnerVanished() {
         this._generation++;
         this._unsubscribe();
         this._devices.clear();
+        this._tokens.clear();
+        this._enumerating = false;
         this._available = false;
         this._emit();
     }
 
     async _fetchDevice(path, gen, emit = true) {
+        const token = this._bump(path);
         try {
             const reply = await this._bus.call(
                 BUS_NAME, path, PROPS_IFACE, 'GetAll',
                 new GLib.Variant('(s)', [DEVICE_IFACE]),
                 null, Gio.DBusCallFlags.NONE, -1, null);
-            if (gen !== this._generation)
+            if (gen !== this._generation || this._tokens.get(path) !== token)
                 return;
             const [props] = reply.recursiveUnpack();
             this._devices.set(path, props);
-            if (emit)
-                this._emit();
         } catch (e) {
             if (gen === this._generation)
                 console.warn(`ghub-battery: GetAll ${path} failed: ${e.message}`);
+            return;
         }
+        if (emit)
+            this._emit();
     }
 }
