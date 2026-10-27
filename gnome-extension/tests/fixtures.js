@@ -13,8 +13,8 @@ const all = loadEnumerate();
 const byPath = p => all[`/org/freedesktop/UPower/devices/${p}`];
 
 export const G305_AWAKE = byPath('battery_hidpp_battery_12');
-export const G515_BT = byPath('keyboard_dev_D7_F1_03_06_CD_9E');
-export const G435_BT = byPath('headset_dev_40_58_99_38_EB_BE');
+export const G515_BT = byPath('keyboard_dev_AA_BB_CC_00_00_02');
+export const G435_BT = byPath('headset_dev_AA_BB_CC_00_00_01');
 export const LAPTOP_BAT = byPath('battery_BAT0');
 export const LINE_POWER = byPath('line_power_AC0');
 

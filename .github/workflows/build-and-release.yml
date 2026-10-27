@@ -26,10 +26,14 @@ jobs:
         working-directory: gnome-extension
         run: gjs -m tests/run.js
 
+      - name: Race test
+        working-directory: gnome-extension
+        run: gjs -m tests/upowerSource.race.test.js
+
       - name: Compile schemas
         run: glib-compile-schemas --strict gnome-extension/schemas/
 
-      - name: Build zip (same layout as gnome-extensions pack)
+      - name: Build zip (same layout as gnome-extensions pack; timestamps differ)
         working-directory: gnome-extension
         run: |
           zip -r "../ghub-battery@vinipy12.github.io.shell-extension.zip" \
@@ -37,7 +41,7 @@ jobs:
             upowerSource.js model.js panelItem.js menu.js notifier.js \
             schemas/org.gnome.shell.extensions.ghub-battery.gschema.xml schemas/gschemas.compiled
           unzip -l "../ghub-battery@vinipy12.github.io.shell-extension.zip"
-          for f in metadata.json extension.js prefs.js stylesheet.css upowerSource.js model.js panelItem.js menu.js notifier.js schemas/gschemas.compiled; do
+          for f in metadata.json extension.js prefs.js stylesheet.css upowerSource.js model.js panelItem.js menu.js notifier.js schemas/org.gnome.shell.extensions.ghub-battery.gschema.xml schemas/gschemas.compiled; do
             unzip -l "../ghub-battery@vinipy12.github.io.shell-extension.zip" | grep -q " $f$" || { echo "MISSING $f"; exit 1; }
           done
 

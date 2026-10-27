@@ -45,6 +45,7 @@ Ou baixe o `.shell-extension.zip` em Releases e rode
 - Mouses mais antigos pelo receptor (como o G305) só informam nível, não
   porcentagem exata. Leitura direta via HID++ fica para um projeto futuro.
 - Sem consumo em mW nem horas restantes (o UPower não expõe isso).
+- A notificação de bateria fraca some ao bloquear a tela (o GNOME desativa extensões na tela de bloqueio); o item na barra continua vermelho.
 
 ## Desenvolvimento
 

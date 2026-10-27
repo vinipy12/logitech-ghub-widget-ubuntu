@@ -17,7 +17,8 @@ export default class GhubBatteryExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
         this._known = new Map();     // id -> record (removed devices kept inactive)
-        this._armed = new Map();     // id -> boolean
+        // Kept across disable()/enable(): the Shell cycles them on lock/unlock, and re-arming would re-fire alerts.
+        this._armed ??= new Map();   // id -> boolean
         this._items = [];            // PanelItem[] in panel order
         this._available = false;
         this._notifier = new Notifier();
@@ -33,7 +34,6 @@ export default class GhubBatteryExtension extends Extension {
         this._notifier?.destroy();
         this._notifier = null;
         this._known = null;
-        this._armed = null;
         this._settings = null;
     }
 
@@ -64,6 +64,7 @@ export default class GhubBatteryExtension extends Extension {
         const armed = this._armed.get(record.id) ?? true;
         const step = alertStep(armed, record);
         this._armed.set(record.id, step.armed);
+        // The crossing disarms even when notifications are off, by design: one alert per crossing regardless of the toggle.
         if (step.fire && this._settings.get_boolean('notify-low'))
             this._notifier.notify(`${record.name}: bateria fraca`, `Nível atual: ${labelFor(record)}`);
     }

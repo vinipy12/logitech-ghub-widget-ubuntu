@@ -15,7 +15,11 @@ const bus = {
 };
 const variant = (o) => ({deepUnpack: () => o, recursiveUnpack: () => o});
 const flush = async () => { for (let i = 0; i < 20; i++) await Promise.resolve(); };
-const take = (m) => pending.splice(pending.findIndex(c => c.method === m), 1)[0];
+const take = (m) => {
+    const i = pending.findIndex(c => c.method === m);
+    if (i === -1) throw new Error(`no pending call: ${m}`);
+    return pending.splice(i, 1)[0];
+};
 
 const snaps = [];
 const source = new UPowerSource(s => snaps.push(s), bus);

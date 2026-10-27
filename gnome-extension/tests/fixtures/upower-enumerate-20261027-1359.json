@@ -95,11 +95,11 @@
     "BatteryLevel": 1,
     "IconName": "ac-adapter-symbolic"
   },
-  "/org/freedesktop/UPower/devices/headset_dev_40_58_99_38_EB_BE": {
-    "NativePath": "/org/bluez/hci0/dev_40_58_99_38_EB_BE",
+  "/org/freedesktop/UPower/devices/headset_dev_AA_BB_CC_00_00_01": {
+    "NativePath": "/org/bluez/hci0/dev_AA_BB_CC_00_00_01",
     "Vendor": "",
     "Model": "G435 Bluetooth Gaming Headset",
-    "Serial": "40:58:99:38:EB:BE",
+    "Serial": "AA:BB:CC:00:00:01",
     "UpdateTime": 1793112499,
     "Type": 17,
     "PowerSupply": false,
@@ -131,7 +131,7 @@
     "NativePath": "hidpp_battery_12",
     "Vendor": "",
     "Model": "G305 Lightspeed Wireless Gaming Mouse",
-    "Serial": "1d-51-ae-c1",
+    "Serial": "00-00-00-01",
     "UpdateTime": 1793123943,
     "Type": 5,
     "PowerSupply": false,
@@ -159,11 +159,11 @@
     "BatteryLevel": 8,
     "IconName": "battery-full-charged-symbolic"
   },
-  "/org/freedesktop/UPower/devices/keyboard_dev_D7_F1_03_06_CD_9E": {
-    "NativePath": "/org/bluez/hci0/dev_D7_F1_03_06_CD_9E",
+  "/org/freedesktop/UPower/devices/keyboard_dev_AA_BB_CC_00_00_02": {
+    "NativePath": "/org/bluez/hci0/dev_AA_BB_CC_00_00_02",
     "Vendor": "",
     "Model": "G515 LS TKL",
-    "Serial": "D7:F1:03:06:CD:9E",
+    "Serial": "AA:BB:CC:00:00:02",
     "UpdateTime": 1793123445,
     "Type": 6,
     "PowerSupply": false,

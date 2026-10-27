@@ -6,6 +6,7 @@ SCHEMA  := schemas/org.gnome.shell.extensions.ghub-battery.gschema.xml
 
 test:
 	gjs -m tests/run.js
+	gjs -m tests/upowerSource.race.test.js
 
 test-race:
 	gjs -m tests/upowerSource.race.test.js
@@ -21,9 +22,10 @@ pack: schemas
 	  $(foreach f,$(filter-out extension.js prefs.js stylesheet.css,$(RUNTIME)),--extra-source=$(f)) \
 	  --schema=$(SCHEMA) \
 	  -o .
-	@unzip -l $(UUID).shell-extension.zip > /tmp/ghub-pack.lst
-	@for f in metadata.json $(RUNTIME) $(SCHEMA); do \
-	  grep -q " $$f$$" /tmp/ghub-pack.lst || { echo "MISSING $$f in zip"; exit 1; }; done
+	@LST=$$(mktemp); unzip -l $(UUID).shell-extension.zip > $$LST; \
+	for f in metadata.json $(RUNTIME) $(SCHEMA); do \
+	  grep -q " $$f$$" $$LST || { echo "MISSING $$f in zip"; rm -f $$LST; exit 1; }; done; \
+	rm -f $$LST
 	@echo "packed $(UUID).shell-extension.zip"
 
 install: pack
