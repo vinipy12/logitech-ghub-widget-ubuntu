@@ -8,6 +8,7 @@ import './model.normalize.test.js';
 import './model.display.test.js';
 import './model.sort.test.js';
 import './model.alert.test.js';
+import './menu.test.js';
 
 const failures = runAll();
 System.exit(failures === 0 ? 0 : 1);
