@@ -15,3 +15,23 @@ test-live:
 
 schemas:
 	glib-compile-schemas --strict schemas/
+
+pack: schemas
+	gnome-extensions pack -f \
+	  $(foreach f,$(filter-out extension.js prefs.js stylesheet.css,$(RUNTIME)),--extra-source=$(f)) \
+	  --schema=$(SCHEMA) \
+	  -o .
+	@unzip -l $(UUID).shell-extension.zip > /tmp/ghub-pack.lst
+	@for f in metadata.json $(RUNTIME) $(SCHEMA); do \
+	  grep -q " $$f$$" /tmp/ghub-pack.lst || { echo "MISSING $$f in zip"; exit 1; }; done
+	@echo "packed $(UUID).shell-extension.zip"
+
+install: pack
+	gnome-extensions install -f $(UUID).shell-extension.zip
+	@echo "Installed. On X11 press Alt+F2, type r, Enter; then: gnome-extensions enable $(UUID)"
+
+nested:
+	dbus-run-session -- gnome-shell --nested --wayland
+
+clean:
+	rm -f $(UUID).shell-extension.zip schemas/gschemas.compiled
