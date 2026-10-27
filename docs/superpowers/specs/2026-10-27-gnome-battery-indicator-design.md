@@ -84,10 +84,12 @@ Output device record:
 - `charging`: `State` is charging or fully-charged.
 - `present`: `IsPresent` and `State != unknown`.
 
-Filter rule: a device counts when `PowerSupply` is false and `kind != other`
-or `Type` is any peripheral type (mouse, keyboard, headset, gaming-input,
-speakers, phone, media-player, tablet, computer excluded). Laptop batteries
-and line power never show. No vendor filter.
+Filter rule: a device counts when `PowerSupply` is false and its UPower
+`Type` is not one of `unknown`, `line-power`, `battery`, `ups`, `monitor`,
+`computer`. Everything else (mouse, keyboard, headset, gaming-input, speakers,
+tablet, phone, media-player, ...) counts, mapped to `kind` as above with
+unlisted types becoming `other`. Laptop batteries and line power never show.
+No vendor filter.
 
 Display rules:
 - Value label: `NN%` when `percent` is a number; otherwise the coarse word
